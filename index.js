@@ -75,11 +75,11 @@ async function run() {
     })
 
 
-    //  app.post('/logout', async (req, res) => {
-    //         const user = req.body;
-    //         console.log('logging out', user);
-    //         res.clearCookie('token', { maxAge: 0 }).send({ success: true })
-    //     })
+     app.post('/logout', async (req, res) => {
+            const user = req.body;
+            console.log('logging out', user);
+            res.clearCookie('token', { maxAge: 0 }).send({ success: true })
+        })
     app.get('/rooms',async(req,res) =>{
         const cursor =roomsCollection.find();
         const result= await cursor.toArray();
@@ -111,6 +111,12 @@ async function run() {
         const id=req.params.id;
         const query ={_id:new ObjectId(id)}
         const result = await bookingCollection.findOne(query );
+        res.send(result);
+     })
+     app.get('/review/:id',async(req,res)=>{
+        const id=req.params.id;
+        const query={service_id:id}
+        const result=await reviewCollection.find(query).toArray();
         res.send(result);
      })
      app.post('/bookings',async(req,res)=>{
