@@ -60,7 +60,7 @@ async function run() {
     await client.connect();
     const roomsCollection=client.db('roomDb').collection('rooms');
     const bookingCollection =client.db('roomDb').collection('bookings');
-    //const reviewCollection=client.db('roomDb').collection('reviews');
+    const reviewCollection=client.db('roomDb').collection('reviews');
     app.post('/jwt',logger,async(req,res)=>{
         const user=req.body;
         console.log(user);
@@ -107,10 +107,21 @@ async function run() {
         const result =await bookingCollection.find(query).toArray();
         res.send(result)
      })
+     app.get('/booking/:id',async(req,res)=>{
+        const id=req.params.id;
+        const query ={_id:new ObjectId(id)}
+        const result = await bookingCollection.findOne(query );
+        res.send(result);
+     })
      app.post('/bookings',async(req,res)=>{
         const booking=req.body;
         //console.log(booking);
         const result =await bookingCollection.insertOne(booking);
+        res.send(result);
+     })
+     app.post('/reviews',async(req,res)=>{
+        const review=req.body;
+        const result=await reviewCollection.insertOne(review);
         res.send(result);
      })
      app.delete('/bookingss/:id',async(req,res)=>{
@@ -120,6 +131,21 @@ async function run() {
         res.send(result);
      })
 
+     app.put("/bookings/:id", async (req, res) => {
+        const id = req.params.id;
+       const filter={ _id: new ObjectId(id) };
+       const options={ upsert: true}
+       const updatedBooking=req.body;
+            const booking = {
+                 $set: { date: updatedBooking.date,
+                name:updatedBooking.name,
+            email:updatedBooking.email }
+                 }
+                 const result =await bookingCollection.updateOne(filter,booking,options)
+                 res.send(result);
+    });
+    
+     
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
