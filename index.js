@@ -136,6 +136,21 @@ async function run() {
         const result=await bookingCollection.deleteOne(query);
         res.send(result);
      })
+     app.patch("/roomss/:id", async (req, res) => {
+        const roomId = req.params.id;
+        const newAvailability = req.body.availability;
+      
+        const filter = { _id: new ObjectId(roomId) };
+        const update = {
+          $set: { availability: newAvailability },
+        };
+      
+        
+          const result = await roomsCollection.updateOne(filter, update);
+      
+         res.send(result)
+      });
+      
 
      app.put("/bookings/:id", async (req, res) => {
         const id = req.params.id;
