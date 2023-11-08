@@ -11,7 +11,8 @@ const port =process.env.PORT ||5000;
 
 //middleware 
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: ['http://localhost:5173',
+    'https://stay-zen-client.web.app'],
     credentials:true
 }));
 app.use(express.json());
@@ -22,7 +23,8 @@ app.use(cookieParser());
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.xwlezc0.mongodb.net/?retryWrites=true&w=majority`;
-console.log(process.env.DB_PASSWORD);
+//console.log(process.env.ACCESS_TOKEN_SECRET);
+
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -47,7 +49,7 @@ const verifyToken =async(req,res,next)=>{
         if(err){
             return res.status(401).send({message:'unauthorized'});
         }
-       // console.log('value of token',decoded)
+        console.log('value of token',decoded)
         req.user=decoded;
         next();
     })
@@ -57,7 +59,7 @@ const verifyToken =async(req,res,next)=>{
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    //await client.connect();
     const roomsCollection=client.db('roomDb').collection('rooms');
     const bookingCollection =client.db('roomDb').collection('bookings');
     const reviewCollection=client.db('roomDb').collection('reviews');
@@ -66,10 +68,11 @@ async function run() {
         console.log(user);
         const token =jwt.sign(user,process.env.ACCESS_TOKEN_SECRET,{expiresIn:'1h'})
         res
-        .cookie('token',token,{
-            httpOnly:true,
-            secure:false,
-            //sameSite:'none',
+        .cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production', 
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+            
         })
         .send({success:true})
     })
@@ -78,7 +81,9 @@ async function run() {
      app.post('/logout', async (req, res) => {
             const user = req.body;
             console.log('logging out', user);
-            res.clearCookie('token', { maxAge: 0 }).send({ success: true })
+            res.clearCookie('token', { maxAge: 0 ,
+                secure:process.env.NODE_ENV === 'production',
+            }).send({ success: true })
         })
     app.get('/rooms',async(req,res) =>{
         const cursor =roomsCollection.find();
@@ -182,9 +187,9 @@ run().catch(console.dir);
 
 
 app.get('/',(req,res)=>{
-    res.send('doctor is runnung')
+    res.send('server is runnung')
 })
 
 app.listen(port,()=>{
-    console.log(`car doctor server is running on port ${port}`)
+    console.log(` server is running on port ${port}`)
 })
