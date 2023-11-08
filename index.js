@@ -12,7 +12,7 @@ const port =process.env.PORT ||5000;
 //middleware 
 app.use(cors({
     origin: ['http://localhost:5173',
-    'https://stay-zen-client.web.app'],
+    'https://stay-zen-client.web.app','http://localhost:5174'],
     credentials:true
 }));
 app.use(express.json());
@@ -40,7 +40,7 @@ const logger =async(req,res,next)=>{
 }
 const verifyToken =async(req,res,next)=>{
     const token=req.cookies?.token;
-   // console.log('value of token',token)
+   console.log('value of token',token)
     if(!token)
     {
         return res.status(401).send({message:'not authorized'});
@@ -96,14 +96,14 @@ async function run() {
         const result = await roomsCollection.findOne(query );
         res.send(result);
      })
-     app.get('/booking',logger,verifyToken,async(req,res)=>{
+     app.get('/booking',async(req,res)=>{
         // console.log(req.query.email);
         //  console.log('tok tok token ',req.cookies.token)
         //  console.log('from valid token',req.user)
-       if(req.query.email!==req.user.email)
-       {
-        return res.status(403).send({message:'forbidden access'})
-       }
+    //    if(req.query.email!==req.user.email)
+    //    {
+    //     return res.status(403).send({message:'forbidden access'})
+    //    }
         let query ={};
         if(req.query?.email)
         {
@@ -174,7 +174,7 @@ async function run() {
      
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    //await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
